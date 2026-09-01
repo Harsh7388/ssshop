@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { signToken } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
@@ -75,10 +75,10 @@ export async function POST(req: NextRequest) {
     });
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error);
     return NextResponse.json(
-      { message: "Internal server error" },
+      { message: error?.message || "Internal server error" },
       { status: 500 }
     );
   }
