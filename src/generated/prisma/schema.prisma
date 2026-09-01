@@ -1,0 +1,116 @@
+// This is your Prisma schema file
+// Prisma v7 with better-sqlite3 driver adapter
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  phone         String?
+  password_hash String
+  gender        String?
+  created_at    DateTime       @default(now())
+  status        String         @default("ACTIVE")
+  bookings      Booking[]
+  notifications Notification[]
+}
+
+model ServiceManager {
+  id            String     @id @default(uuid())
+  name          String
+  email         String     @unique
+  phone         String?
+  password_hash String
+  role          String     @default("MANAGER")
+  status        String     @default("ACTIVE")
+  bookings      Booking[]
+  schedules     Schedule[]
+}
+
+model Service {
+  id             String    @id @default(uuid())
+  name           String
+  category       String
+  gender         String
+  description    String
+  price          Float
+  discount_price Float?
+  duration       Int
+  image          String?
+  status         String    @default("ACTIVE")
+  bookings       Booking[]
+}
+
+model Booking {
+  id                 String          @id @default(uuid())
+  booking_number     String          @unique
+  user_id            String
+  service_id         String
+  manager_id         String?
+  booking_date       DateTime
+  booking_time       String
+  status             String          @default("REQUESTED")
+  payment_preference String
+  total_amount       Float
+  notes              String?
+  created_at         DateTime        @default(now())
+  user               User            @relation(fields: [user_id], references: [id])
+  service            Service         @relation(fields: [service_id], references: [id])
+  manager            ServiceManager? @relation(fields: [manager_id], references: [id])
+  payments           Payment[]
+  notifications      Notification[]
+}
+
+model Payment {
+  id             String    @id @default(uuid())
+  booking_id     String
+  amount         Float
+  payment_method String
+  payment_status String    @default("UNPAID")
+  transaction_id String?
+  payment_date   DateTime?
+  booking        Booking   @relation(fields: [booking_id], references: [id])
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  user_id     String
+  booking_id  String?
+  title       String
+  message     String
+  read_status Boolean  @default(false)
+  created_at  DateTime @default(now())
+  user        User     @relation(fields: [user_id], references: [id])
+  booking     Booking? @relation(fields: [booking_id], references: [id])
+}
+
+model Offer {
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  discount     Float
+  discountType String   @default("PERCENTAGE")
+  start_date   DateTime
+  end_date     DateTime
+  status       String   @default("ACTIVE")
+  service_id   String?
+  gender       String?
+}
+
+model Schedule {
+  id           String         @id @default(uuid())
+  manager_id   String
+  date         DateTime
+  start_time   String
+  end_time     String
+  availability Boolean        @default(true)
+  manager      ServiceManager @relation(fields: [manager_id], references: [id])
+}
