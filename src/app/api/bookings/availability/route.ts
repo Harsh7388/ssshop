@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
+  let dateStr: string | null = null;
   try {
     const { searchParams } = new URL(req.url);
-    const dateStr = searchParams.get("date");
+    dateStr = searchParams.get("date");
 
     if (!dateStr) {
       return NextResponse.json({ message: "Date parameter required" }, { status: 400 });
@@ -85,7 +86,7 @@ export async function GET(req: NextRequest) {
       "07:00 PM",
     ];
     return NextResponse.json({
-      date: dateStr,
+      date: dateStr || "",
       allTimeSlots,
       occupiedSlots: [],
       availableSlots: allTimeSlots,
