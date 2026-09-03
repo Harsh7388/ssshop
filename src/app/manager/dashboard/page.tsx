@@ -58,7 +58,8 @@ function ManagerDashboardContent() {
   const [calendarViewMode, setCalendarViewMode] = useState<"TODAY" | "DAY" | "WEEK" | "MONTH">("TODAY");
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string>(new Date().toISOString().split("T")[0]);
 
-  const staffMembers = ["Rahul Sharma", "Priya Singh", "Amit Kumar", "Neha Verma", "Vikram Malhotra"];
+  const [staffMembers, setStaffMembers] = useState<string[]>([]);
+
   const timeSlots = ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:30 PM", "04:00 PM", "05:30 PM", "07:00 PM"];
 
   const fetchManagerData = async () => {
@@ -68,6 +69,7 @@ function ManagerDashboardContent() {
       if (res.ok) {
         setRequests(data.requests || []);
         setSchedules(data.schedules || []);
+        setStaffMembers((data.staff || []).map((s: any) => s.name));
       }
       setLoading(false);
     } catch (error) {
@@ -75,6 +77,7 @@ function ManagerDashboardContent() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchManagerData();

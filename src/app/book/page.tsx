@@ -86,11 +86,20 @@ function BookAppointmentContent() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to book appointment");
+      if (!res.ok) {
+        if (res.status === 401) {
+          setError("Please log in to your account to complete your booking.");
+          setTimeout(() => {
+            router.push(`/login?redirect=/book?service=${selectedService?.id || ''}`);
+          }, 1500);
+          return;
+        }
+        throw new Error(data.message || "Failed to book appointment");
+      }
 
       router.push(`/book/success?id=${data.booking.booking_number}`);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "An unexpected error occurred. Please try again.");
       setBookingLoading(false);
     }
   };

@@ -16,7 +16,7 @@ function BookingSuccessContent() {
         <h1 className="text-3xl font-serif text-secondary mb-4">Booking Requested!</h1>
         {bookingId && <p className="text-lg mb-2">Booking ID: <span className="font-bold">{bookingId}</span></p>}
         <p className="text-muted mb-8">
-          Your booking request has been sent to the SS SALON service manager. You will receive a confirmation once your appointment is scheduled.
+          Your booking request has been sent to the SS Hair Studio service manager. You will receive a confirmation once your appointment is scheduled.
         </p>
         <div className="flex flex-col gap-4">
           <Link href="/customer/dashboard" className="btn-primary w-full">

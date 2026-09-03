@@ -6,6 +6,8 @@ import Link from "next/link";
 
 import { useAuth } from "@/context/AuthContext";
 
+import Logo from "@/components/Logo";
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,9 +52,11 @@ export default function Login() {
   return (
     <div className="container py-20 animate-fade-in flex justify-center min-h-[70vh] items-center">
       <div className="card w-full max-w-md">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-serif text-secondary mb-2">Welcome Back</h2>
-          <p className="text-muted">Sign in to your SS SALON account</p>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <div className="mb-4">
+            <Logo size="lg" />
+          </div>
+          <p className="text-muted">Sign in to your SS Hair Studio account</p>
         </div>
 
         {error && (
@@ -98,9 +102,11 @@ export default function Login() {
           <div className="form-group">
             <div className="flex justify-between items-center mb-1">
               <label className="form-label mb-0" htmlFor="password">Password</label>
-              <Link href="/forgot-password" className="text-xs text-primary hover:underline">
-                Forgot password?
-              </Link>
+              {role === "CUSTOMER" && (
+                <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                  Forgot password?
+                </Link>
+              )}
             </div>
             <input
               type="password"

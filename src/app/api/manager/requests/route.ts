@@ -27,9 +27,15 @@ export async function GET(req: NextRequest) {
       orderBy: { date: "asc" }
     });
 
-    return NextResponse.json({ requests, schedules }, { status: 200 });
+    const staff = await prisma.staff.findMany({
+      where: { status: "ACTIVE" },
+      orderBy: { name: "asc" }
+    });
+
+    return NextResponse.json({ requests, schedules, staff }, { status: 200 });
   } catch (error) {
     console.error("Fetch manager requests error:", error);
     return NextResponse.json({ message: "Error fetching requests" }, { status: 500 });
   }
 }
+

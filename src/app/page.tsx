@@ -152,7 +152,7 @@ export default function Home() {
                 fontStyle: "italic",
                 display: "inline-block"
               }}>Your Confidence.</span>
-              <br />Your SS Salon.
+              <br />SS Hair Studio.
             </h1>
 
             <p style={{
@@ -472,11 +472,11 @@ export default function Home() {
             </Link>
           </div>
           <div style={{ display: "flex", gap: "32px", justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="tel:7388917730" style={{ display: "flex", alignItems: "center", gap: "8px", color: "#6b7280", fontSize: "0.875rem", fontFamily: "Montserrat, sans-serif", textDecoration: "none" }}>
-              <Phone size={16} color="#c19d60" /> 7388917730
+            <a href="tel:8087799315" style={{ display: "flex", alignItems: "center", gap: "8px", color: "#6b7280", fontSize: "0.875rem", fontFamily: "Montserrat, sans-serif", textDecoration: "none" }}>
+              <Phone size={16} color="#c19d60" /> 8087799315
             </a>
             <span style={{ display: "flex", alignItems: "center", gap: "8px", color: "#6b7280", fontSize: "0.875rem", fontFamily: "Montserrat, sans-serif" }}>
-              <MapPin size={16} color="#c19d60" /> SS SALON, Your City
+              <MapPin size={16} color="#c19d60" /> Bhayandar East, Thane
             </span>
           </div>
         </div>

@@ -6,6 +6,8 @@ import Link from "next/link";
 
 import { useAuth } from "@/context/AuthContext";
 
+import Logo from "@/components/Logo";
+
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -48,9 +50,11 @@ export default function Register() {
   return (
     <div className="container py-20 animate-fade-in flex justify-center items-center min-h-[80vh]">
       <div className="card w-full max-w-lg">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-serif text-secondary mb-2">Create an Account</h2>
-          <p className="text-muted">Join SS SALON for premium bookings</p>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <div className="mb-4">
+            <Logo size="lg" />
+          </div>
+          <p className="text-muted">Join SS Hair Studio for premium appointments</p>
         </div>
 
         {error && (

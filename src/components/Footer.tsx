@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import { Phone, Mail, MapPin, Scissors, CalendarDays } from "lucide-react";
 
 export default function Footer() {
@@ -11,12 +12,11 @@ export default function Footer() {
 
         {/* Brand */}
         <div style={{ gridColumn: "span 1" }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px", textDecoration: "none" }}>
-            <div style={{ width: "38px", height: "38px", borderRadius: "50%", background: "#c19d60", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: "1rem" }}>SS</div>
-            <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: "1.2rem", color: "#fff" }}>SS SALON</span>
+          <Link href="/" style={{ textDecoration: "none", display: "inline-block", marginBottom: "20px" }}>
+            <Logo size="md" light={true} />
           </Link>
           <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.75, marginBottom: "20px" }}>
-            Premium beauty & grooming for everyone. Experience luxury haircuts, spa, facials, and styling tailored to your confidence.
+            Premium unisex salon experience in Bhayandar East. Haircuts, spa, facials, waxing, and styling tailored for your style and confidence.
           </p>
           <div style={{ display: "flex", gap: "4px" }}>
             {["★","★","★","★","★"].map((s, i) => <span key={i} style={{ color: "#c19d60", fontSize: "1rem" }}>{s}</span>)}
@@ -42,7 +42,7 @@ export default function Footer() {
         <div>
           <h4 style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#c19d60", marginBottom: "20px" }}>Services</h4>
           <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "12px" }}>
-            {[["Men's Grooming", "/services/men"], ["Women's Beauty", "/services/women"], ["Hair Spa", "/services"], ["Bridal Makeup", "/services"], ["Beard Styling", "/services/men"]].map(([l, h]) => (
+            {[["Men's Grooming", "/services/men"], ["Women's Beauty", "/services/women"], ["Waxing (Honey & Rica)", "/services/women"], ["Hair Spa", "/services"], ["Beard Styling", "/services/men"]].map(([l, h]) => (
               <li key={l}>
                 <Link href={h} style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", textDecoration: "none", transition: "color 0.2s" }}
                   onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "#c19d60")}
@@ -57,20 +57,20 @@ export default function Footer() {
         <div>
           <h4 style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#c19d60", marginBottom: "20px" }}>Contact Us</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-            <a href="tel:7388917730" style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", textDecoration: "none", transition: "color 0.2s" }}
+            <a href="tel:8087799315" style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", textDecoration: "none", transition: "color 0.2s" }}
               onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "#c19d60")}
               onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
             >
-              <Phone size={15} color="#c19d60" /> 7388917730
+              <Phone size={15} color="#c19d60" /> 8087799315
             </a>
-            <a href="mailto:ssshop@gmail.com" style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", textDecoration: "none", transition: "color 0.2s" }}
+            <a href="mailto:sshairstudio@gmail.com" style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", textDecoration: "none", transition: "color 0.2s" }}
               onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "#c19d60")}
               onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
             >
-              <Mail size={15} color="#c19d60" /> ssshop@gmail.com
+              <Mail size={15} color="#c19d60" /> sshairstudio@gmail.com
             </a>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.55)" }}>
-              <MapPin size={15} color="#c19d60" style={{ marginTop: "1px", flexShrink: 0 }} /> SS SALON, Your City
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }}>
+              <MapPin size={15} color="#c19d60" style={{ marginTop: "3px", flexShrink: 0 }} /> Shop no. 3 Rashmi Laxmi Sadan, Opposite Mira Bhayandar Mahanagar Palika, Navghar Road, Bhayandar East, Thane-401105, Maharastra
             </div>
           </div>
 
@@ -95,7 +95,7 @@ export default function Footer() {
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", padding: "22px 0" }}>
         <div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
           <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.78rem", color: "rgba(255,255,255,0.35)" }}>
-            © {new Date().getFullYear()} SS SALON. All rights reserved.
+            © {new Date().getFullYear()} SS Hair Studio. All rights reserved.
           </p>
           <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.78rem", color: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", gap: "6px" }}>
             <Scissors size={13} color="#c19d60" /> Premium Salon Services

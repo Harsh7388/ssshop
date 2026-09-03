@@ -83,6 +83,21 @@ function AdminDashboardContent() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState("");
 
+  // Manager Management State
+  const [managerModalOpen, setManagerModalOpen] = useState(false);
+  const [editingManager, setEditingManager] = useState<any>(null);
+  const [managerForm, setManagerForm] = useState({ name: "", email: "", phone: "", password: "", status: "ACTIVE" });
+  const [managerFormLoading, setManagerFormLoading] = useState(false);
+  const [managerFormError, setManagerFormError] = useState("");
+
+  // Staff Management State
+  const [staffList, setStaffList] = useState<any[]>([]);
+  const [staffModalOpen, setStaffModalOpen] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<any>(null);
+  const [staffForm, setStaffForm] = useState({ name: "", role: "STYLIST", phone: "" });
+  const [staffFormLoading, setStaffFormLoading] = useState(false);
+  const [staffFormError, setStaffFormError] = useState("");
+
   const fetchAdminData = async () => {
     try {
       const res = await fetch("/api/admin/dashboard", { cache: "no-store" });
@@ -95,11 +110,109 @@ function AdminDashboardContent() {
     }
   };
 
+  const fetchStaff = async () => {
+    try {
+      const res = await fetch("/api/admin/staff", { cache: "no-store" });
+      const d = await res.json();
+      if (res.ok) setStaffList(d.staff || []);
+    } catch (err) { console.error(err); }
+  };
+
   useEffect(() => {
     fetchAdminData();
+    fetchStaff();
     const tabParam = searchParams.get("tab");
     if (tabParam) setActiveTab(tabParam);
   }, [searchParams]);
+
+  // --- MANAGER MANAGEMENT ACTIONS ---
+  const handleOpenManagerModal = (manager: any = null) => {
+    setEditingManager(manager);
+    setManagerForm(manager
+      ? { name: manager.name, email: manager.email, phone: manager.phone || "", password: "", status: manager.status }
+      : { name: "", email: "", phone: "", password: "", status: "ACTIVE" }
+    );
+    setManagerFormError("");
+    setManagerModalOpen(true);
+  };
+
+  const handleSaveManager = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setManagerFormLoading(true);
+    setManagerFormError("");
+    try {
+      let res;
+      if (editingManager) {
+        const payload: any = { name: managerForm.name, email: managerForm.email, phone: managerForm.phone, status: managerForm.status };
+        if (managerForm.password) payload.password = managerForm.password;
+        res = await fetch(`/api/admin/managers/${editingManager.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      } else {
+        res = await fetch("/api/admin/managers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(managerForm) });
+      }
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.message || "Failed to save manager");
+      setManagerModalOpen(false);
+      fetchAdminData();
+    } catch (err: any) {
+      setManagerFormError(err.message);
+    } finally {
+      setManagerFormLoading(false);
+    }
+  };
+
+  const handleDeactivateManager = async (id: string) => {
+    if (!confirm("Deactivate this manager? They will no longer be able to log in.")) return;
+    try {
+      await fetch(`/api/admin/managers/${id}`, { method: "DELETE" });
+      fetchAdminData();
+    } catch (err) { console.error(err); }
+  };
+
+  // --- STAFF MANAGEMENT ACTIONS ---
+  const handleOpenStaffModal = (staff: any = null) => {
+    setEditingStaff(staff);
+    setStaffForm(staff ? { name: staff.name, role: staff.role, phone: staff.phone || "" } : { name: "", role: "STYLIST", phone: "" });
+    setStaffFormError("");
+    setStaffModalOpen(true);
+  };
+
+  const handleSaveStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStaffFormLoading(true);
+    setStaffFormError("");
+    try {
+      let res;
+      if (editingStaff) {
+        res = await fetch(`/api/admin/staff/${editingStaff.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(staffForm) });
+      } else {
+        res = await fetch("/api/admin/staff", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(staffForm) });
+      }
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.message || "Failed to save staff");
+      setStaffModalOpen(false);
+      fetchStaff();
+    } catch (err: any) {
+      setStaffFormError(err.message);
+    } finally {
+      setStaffFormLoading(false);
+    }
+  };
+
+  const handleDeleteStaff = async (id: string) => {
+    if (!confirm("Remove this staff member?")) return;
+    try {
+      await fetch(`/api/admin/staff/${id}`, { method: "DELETE" });
+      fetchStaff();
+    } catch (err) { console.error(err); }
+  };
+
+  const handleToggleStaffStatus = async (staff: any) => {
+    const nextStatus = staff.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    try {
+      await fetch(`/api/admin/staff/${staff.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: nextStatus }) });
+      fetchStaff();
+    } catch (err) { console.error(err); }
+  };
 
   // --- SERVICE MANAGEMENT ACTIONS ---
   const handleOpenServiceModal = (service: any = null) => {
@@ -314,7 +427,8 @@ function AdminDashboardContent() {
   const navigationItems = [
     { id: "overview", label: "Overview", icon: BarChart3 },
     { id: "users", label: "👥 Users", count: users.length },
-    { id: "managers", label: "👨‍💼 Service Managers", count: managers.length },
+    { id: "managers", label: "👨‍💼 Managers", count: managers.length },
+    { id: "staff", label: "💇 Staff Members", count: staffList.length },
     { id: "services", label: "✂️ Services", count: services.length },
     { id: "offers", label: "🎁 Offers", count: offers.length },
     { id: "bookings", label: "📅 Bookings", count: bookings.length },
@@ -729,30 +843,99 @@ function AdminDashboardContent() {
         {/* MANAGERS TAB */}
         {activeTab === "managers" && (
           <div className="animate-fade-in space-y-6">
-            <h2 className="text-2xl font-serif text-secondary">👨‍💼 Service Managers ({managers.length})</h2>
-            <div className="card p-0 overflow-hidden bg-surface border border-border shadow-md rounded-xl">
-              <table className="w-full text-left border-collapse text-xs md:text-sm">
-                <thead>
-                  <tr className="bg-gray-100 border-b border-border uppercase font-bold text-gray-600">
-                    <th className="py-3 px-4">Manager Name</th>
-                    <th className="py-3 px-4">Email</th>
-                    <th className="py-3 px-4">Phone</th>
-                    <th className="py-3 px-4">Role</th>
-                    <th className="py-3 px-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {managers.map((m: any) => (
-                    <tr key={m.id}>
-                      <td className="py-3 px-4 font-bold text-secondary">{m.name}</td>
-                      <td className="py-3 px-4">{m.email}</td>
-                      <td className="py-3 px-4">{m.phone || "N/A"}</td>
-                      <td className="py-3 px-4"><span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded font-bold">{m.role}</span></td>
-                      <td className="py-3 px-4"><span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded font-bold">{m.status}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-serif text-secondary">👨‍💼 Manager Accounts</h2>
+                <p className="text-xs text-muted">Create, edit, reset passwords, or deactivate manager logins.</p>
+              </div>
+              <button onClick={() => handleOpenManagerModal()} className="btn-primary text-sm flex items-center gap-2 shadow">
+                <Plus size={16} /> Add Manager
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {managers.map((m: any) => (
+                <div key={m.id} className="card p-5 bg-surface border border-border shadow-sm rounded-xl flex justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg font-bold text-secondary">{m.name}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${m.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>{m.status}</span>
+                    </div>
+                    <div className="text-xs text-muted mb-0.5">📧 {m.email}</div>
+                    <div className="text-xs text-muted">📞 {m.phone || "No phone"}</div>
+                    <div className="mt-2">
+                      <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">{m.role}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => handleOpenManagerModal(m)}
+                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-primary text-primary hover:bg-primary hover:text-white transition-colors"
+                    >
+                      <Edit size={13} /> Edit / Reset
+                    </button>
+                    {m.status === "ACTIVE" && (
+                      <button
+                        onClick={() => handleDeactivateManager(m.id)}
+                        className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <X size={13} /> Deactivate
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {managers.length === 0 && (
+                <div className="col-span-2 text-center py-12 text-muted text-sm">No managers yet. Click "Add Manager" to create one.</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* STAFF TAB */}
+        {activeTab === "staff" && (
+          <div className="animate-fade-in space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-serif text-secondary">💇 Staff Members</h2>
+                <p className="text-xs text-muted">Add and manage stylists/staff who can be assigned to customer bookings by the manager.</p>
+              </div>
+              <button onClick={() => handleOpenStaffModal()} className="btn-primary text-sm flex items-center gap-2 shadow">
+                <Plus size={16} /> Add Staff
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {staffList.map((s: any) => (
+                <div key={s.id} className="card p-5 bg-surface border border-border shadow-sm rounded-xl">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="font-bold text-secondary text-base">{s.name}</div>
+                      <div className="text-xs text-primary font-semibold mt-0.5">{s.role}</div>
+                      {s.phone && <div className="text-xs text-muted mt-0.5">📞 {s.phone}</div>}
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${s.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600'}`}>
+                      {s.status}
+                    </span>
+                  </div>
+                  <div className="flex gap-2 pt-3 border-t border-border">
+                    <button onClick={() => handleOpenStaffModal(s)} className="flex-1 text-xs py-1.5 border border-gray-300 rounded-lg hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-1">
+                      <Edit size={12} /> Edit
+                    </button>
+                    <button onClick={() => handleToggleStaffStatus(s)} className={`flex-1 text-xs py-1.5 rounded-lg border transition-colors flex items-center justify-center gap-1 ${
+                      s.status === 'ACTIVE' ? 'border-orange-200 text-orange-700 hover:bg-orange-50' : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
+                    }`}>
+                      {s.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button onClick={() => handleDeleteStaff(s.id)} className="p-1.5 text-red-500 hover:text-red-700">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {staffList.length === 0 && (
+                <div className="col-span-3 text-center py-12 text-muted text-sm">No staff members yet. Click "Add Staff" to add one.</div>
+              )}
             </div>
           </div>
         )}
@@ -1031,6 +1214,111 @@ function AdminDashboardContent() {
                 </button>
                 <button type="submit" disabled={formLoading} className="btn-primary flex-1 py-2 text-xs">
                   {formLoading ? "Saving..." : "Save Offer"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MANAGER MODAL */}
+      {managerModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative">
+            <button onClick={() => setManagerModalOpen(false)} className="absolute right-4 top-4 text-gray-400 hover:text-secondary">
+              <X size={20} />
+            </button>
+            <h3 className="text-2xl font-serif text-secondary mb-1">
+              {editingManager ? "Edit Manager" : "Add New Manager"}
+            </h3>
+            {editingManager && (
+              <p className="text-xs text-muted mb-4">Leave the password field empty to keep the existing password unchanged.</p>
+            )}
+
+            {managerFormError && <div className="bg-red-50 text-red-700 p-3 rounded text-xs mb-4">{managerFormError}</div>}
+
+            <form onSubmit={handleSaveManager} className="space-y-4 text-xs">
+              <div className="form-group mb-0">
+                <label className="form-label">Full Name *</label>
+                <input type="text" className="form-input text-xs" value={managerForm.name}
+                  onChange={(e) => setManagerForm({ ...managerForm, name: e.target.value })} required />
+              </div>
+              <div className="form-group mb-0">
+                <label className="form-label">Login Email (ID) *</label>
+                <input type="email" className="form-input text-xs" value={managerForm.email}
+                  onChange={(e) => setManagerForm({ ...managerForm, email: e.target.value })} required />
+              </div>
+              <div className="form-group mb-0">
+                <label className="form-label">Phone Number</label>
+                <input type="text" className="form-input text-xs" value={managerForm.phone}
+                  onChange={(e) => setManagerForm({ ...managerForm, phone: e.target.value })} />
+              </div>
+              <div className="form-group mb-0">
+                <label className="form-label">{editingManager ? "New Password (leave blank to keep current)" : "Password *"}</label>
+                <input type="password" className="form-input text-xs" value={managerForm.password}
+                  onChange={(e) => setManagerForm({ ...managerForm, password: e.target.value })}
+                  required={!editingManager} placeholder={editingManager ? "Enter new password to reset..." : "Min 4 characters"} />
+              </div>
+              {editingManager && (
+                <div className="form-group mb-0">
+                  <label className="form-label">Status</label>
+                  <select className="form-input text-xs" value={managerForm.status}
+                    onChange={(e) => setManagerForm({ ...managerForm, status: e.target.value })}>
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="INACTIVE">INACTIVE</option>
+                  </select>
+                </div>
+              )}
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setManagerModalOpen(false)} className="btn-secondary flex-1 py-2 text-xs">Cancel</button>
+                <button type="submit" disabled={managerFormLoading} className="btn-primary flex-1 py-2 text-xs">
+                  {managerFormLoading ? "Saving..." : editingManager ? "Update Manager" : "Create Manager"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* STAFF MODAL */}
+      {staffModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative">
+            <button onClick={() => setStaffModalOpen(false)} className="absolute right-4 top-4 text-gray-400 hover:text-secondary">
+              <X size={20} />
+            </button>
+            <h3 className="text-2xl font-serif text-secondary mb-4">
+              {editingStaff ? "Edit Staff Member" : "Add New Staff Member"}
+            </h3>
+
+            {staffFormError && <div className="bg-red-50 text-red-700 p-3 rounded text-xs mb-4">{staffFormError}</div>}
+
+            <form onSubmit={handleSaveStaff} className="space-y-4 text-xs">
+              <div className="form-group mb-0">
+                <label className="form-label">Staff Name *</label>
+                <input type="text" className="form-input text-xs" value={staffForm.name}
+                  onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} required placeholder="e.g. Priya Sharma" />
+              </div>
+              <div className="form-group mb-0">
+                <label className="form-label">Role / Designation</label>
+                <select className="form-input text-xs" value={staffForm.role}
+                  onChange={(e) => setStaffForm({ ...staffForm, role: e.target.value })}>
+                  <option value="STYLIST">Stylist</option>
+                  <option value="HAIR_SPECIALIST">Hair Specialist</option>
+                  <option value="SKIN_SPECIALIST">Skin Specialist</option>
+                  <option value="WAX_SPECIALIST">Wax Specialist</option>
+                  <option value="ASSISTANT">Assistant</option>
+                </select>
+              </div>
+              <div className="form-group mb-0">
+                <label className="form-label">Phone Number</label>
+                <input type="text" className="form-input text-xs" value={staffForm.phone}
+                  onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })} placeholder="Optional" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setStaffModalOpen(false)} className="btn-secondary flex-1 py-2 text-xs">Cancel</button>
+                <button type="submit" disabled={staffFormLoading} className="btn-primary flex-1 py-2 text-xs">
+                  {staffFormLoading ? "Saving..." : editingStaff ? "Update Staff" : "Add Staff"}
                 </button>
               </div>
             </form>

@@ -29,10 +29,10 @@ export default function ContactPage() {
   return (
     <div className="container py-16 animate-fade-in max-w-5xl">
       <div className="text-center max-w-3xl mx-auto mb-16">
-        <span className="text-primary font-bold tracking-wider text-sm uppercase mb-2 block">Contact SS SALON</span>
+        <span className="text-primary font-bold tracking-wider text-sm uppercase mb-2 block">Contact SS Hair Studio</span>
         <h1 className="text-4xl md:text-5xl font-serif text-secondary mb-4">Get In Touch With Us</h1>
         <p className="text-muted text-lg">
-          Have questions or need assistance with your booking? Reach out directly via call, email, or message.
+          Have questions or need assistance with your booking? Reach out directly via call, email, or visit our studio in Bhayandar East.
         </p>
       </div>
 
@@ -46,18 +46,18 @@ export default function ContactPage() {
             </div>
             <h3 className="text-2xl font-serif text-white mb-2">📞 Call Us Directly</h3>
             <p className="text-gray-300 text-sm mb-4">
-              Speak with our customer care and service managers immediately.
+              Speak with our customer care and service team immediately.
             </p>
             <div className="text-3xl font-bold text-primary mb-2 tracking-wide">
-              7388917730
+              8087799315
             </div>
           </div>
           <div className="mt-6 pt-6 border-t border-gray-700">
             <a 
-              href="tel:7388917730" 
+              href="tel:8087799315" 
               className="btn-primary w-full text-center block text-lg font-bold py-3 shadow-md hover:scale-[1.02] transition-transform"
             >
-              Call 7388917730 Now
+              Call 8087799315 Now
             </a>
           </div>
         </div>
@@ -73,15 +73,15 @@ export default function ContactPage() {
               Send us your inquiries, custom requirements, or feedback anytime.
             </p>
             <div className="text-xl font-bold text-secondary mb-2 break-all">
-              ssshop@gmail.com
+              sshairstudio@gmail.com
             </div>
           </div>
           <div className="mt-6 pt-6 border-t border-border">
             <a 
-              href="mailto:ssshop@gmail.com" 
+              href="mailto:sshairstudio@gmail.com" 
               className="btn-secondary w-full text-center block text-lg font-bold py-3 shadow-sm hover:scale-[1.02] transition-transform"
             >
-              Email ssshop@gmail.com
+              Email sshairstudio@gmail.com
             </a>
           </div>
         </div>
@@ -99,7 +99,7 @@ export default function ContactPage() {
               <CheckCircle2 size={48} className="text-green-600 mx-auto mb-4" />
               <h3 className="text-2xl font-bold text-green-900 mb-2">Message Sent!</h3>
               <p className="text-green-700 text-sm mb-6">
-                Thank you for contacting SS SALON. Our team will get back to you shortly.
+                Thank you for contacting SS Hair Studio. Our team will get back to you shortly.
               </p>
               <button onClick={() => setSubmitted(false)} className="btn-primary text-sm">
                 Send Another Message
@@ -113,7 +113,7 @@ export default function ContactPage() {
                   <input 
                     type="text" 
                     className="form-input" 
-                    placeholder="John Doe" 
+                    placeholder="Customer Name" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -124,7 +124,7 @@ export default function ContactPage() {
                   <input 
                     type="tel" 
                     className="form-input" 
-                    placeholder="7388917730" 
+                    placeholder="8087799315" 
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                   />
@@ -136,7 +136,7 @@ export default function ContactPage() {
                 <input 
                   type="email" 
                   className="form-input" 
-                  placeholder="ssshop@gmail.com" 
+                  placeholder="your.email@gmail.com" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -174,10 +174,10 @@ export default function ContactPage() {
         <div className="flex flex-col gap-6">
           <div className="card p-6 border-l-4 border-primary">
             <h3 className="font-bold text-lg mb-2 text-secondary flex items-center gap-2">
-              <Scissors size={20} className="text-primary" /> SS SALON Official
+              <Scissors size={20} className="text-primary" /> SS Hair Studio
             </h3>
             <p className="text-sm text-muted leading-relaxed">
-              Premium Beauty & Grooming Services for Men & Women.
+              Premium Unisex Beauty & Grooming Services for Men & Women.
             </p>
           </div>
 
@@ -188,8 +188,8 @@ export default function ContactPage() {
               </div>
               <div>
                 <h4 className="font-bold text-sm text-gray-500 uppercase tracking-wide mb-1">Official Phone</h4>
-                <a href="tel:7388917730" className="text-lg font-bold text-primary hover:underline">
-                  7388917730
+                <a href="tel:8087799315" className="text-lg font-bold text-primary hover:underline">
+                  8087799315
                 </a>
               </div>
             </div>
@@ -198,13 +198,13 @@ export default function ContactPage() {
           <div className="card p-6">
             <div className="flex items-start gap-4">
               <div className="bg-primary-light p-3 rounded-full text-primary shrink-0">
-                <Mail size={20} />
+                <MapPin size={20} />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-gray-500 uppercase tracking-wide mb-1">Official Email</h4>
-                <a href="mailto:ssshop@gmail.com" className="text-base font-bold text-secondary hover:underline break-all">
-                  ssshop@gmail.com
-                </a>
+                <h4 className="font-bold text-sm text-gray-500 uppercase tracking-wide mb-1">Studio Address</h4>
+                <p className="text-sm text-secondary font-medium leading-relaxed">
+                  Shop no. 3 Rashmi Laxmi Sadan, Opposite Mira Bhayandar Mahanagar Palika, Navghar Road, Bhayandar East, Thane-401105, Maharastra
+                </p>
               </div>
             </div>
           </div>

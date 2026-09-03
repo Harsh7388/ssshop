@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { LogIn, UserPlus, CalendarDays, LogOut, Menu, X, Calendar, ChevronDown, Sun, Moon } from "lucide-react";
@@ -54,25 +55,8 @@ export default function Header() {
       <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: "72px" }}>
 
         {/* ── Logo ── */}
-        <Link href="/" onClick={close} style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
-          <div style={{
-            width: "40px", height: "40px", borderRadius: "50%",
-            background: "#c19d60", color: "#fff",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontFamily: "'Playfair Display', serif",
-            fontWeight: 700, fontSize: "1.1rem",
-            boxShadow: "0 2px 10px rgba(193,157,96,0.35)",
-            flexShrink: 0, transition: "transform 0.2s ease"
-          }}>
-            SS
-          </div>
-          <span style={{
-            fontFamily: "'Playfair Display', serif",
-            fontWeight: 700, fontSize: "1.2rem",
-            color: "#121315", letterSpacing: "-0.01em"
-          }}>
-            SS SALON
-          </span>
+        <Link href="/" onClick={close} style={{ textDecoration: "none" }}>
+          <Logo size="md" />
         </Link>
 
         {/* ── Desktop Nav ── */}

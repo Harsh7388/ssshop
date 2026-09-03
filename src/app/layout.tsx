@@ -6,8 +6,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "SS SALON | Premium Beauty & Grooming",
-  description: "Look good. Feel confident. Be yourself. SS SALON provides professional beauty and grooming services for both men and women.",
+  title: "SS Hair Studio | Luxury Unisex Salon in Bhayandar East",
+  description: "Look good. Feel confident. Be yourself. SS Hair Studio provides professional hair, beauty, waxing (Honey & Rica), and grooming services in Bhayandar East, Thane.",
 };
 
 export default function RootLayout({

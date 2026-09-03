@@ -140,3 +140,13 @@ model Feedback {
   service    Service  @relation(fields: [service_id], references: [id])
 }
 
+model Staff {
+  id         String   @id @default(uuid())
+  name       String
+  role       String   @default("STYLIST")
+  phone      String?
+  status     String   @default("ACTIVE")
+  created_at DateTime @default(now())
+}
+
+

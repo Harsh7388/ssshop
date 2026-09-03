@@ -9,15 +9,45 @@ function generateBookingNumber() {
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get('token')?.value;
-    if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized. Please log in to book an appointment." }, { status: 401 });
+    }
     
-    const user = await verifyToken(token);
-    if (!user || user.role !== 'CUSTOMER') return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const userPayload = await verifyToken(token);
+    if (!userPayload || userPayload.role !== 'CUSTOMER') {
+      return NextResponse.json({ message: "Unauthorized. Please log in as a customer." }, { status: 401 });
+    }
+
+    // Verify user exists in DB
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userPayload.id as string }
+    });
+    if (!dbUser) {
+      return NextResponse.json({ message: "User account not found. Please log in again." }, { status: 401 });
+    }
 
     const body = await req.json();
     const { service_id, booking_date, booking_time, notes, payment_preference, total_amount } = body;
 
+    if (!service_id || !booking_date || !booking_time) {
+      return NextResponse.json({ message: "Missing required booking details (service, date, or time)." }, { status: 400 });
+    }
+
+    // Verify service exists in DB
+    const dbService = await prisma.service.findUnique({
+      where: { id: service_id }
+    });
+    if (!dbService) {
+      return NextResponse.json({ message: "Selected service was not found or is no longer active." }, { status: 404 });
+    }
+
+    const finalAmount = Number(total_amount) > 0 ? Number(total_amount) : Number(dbService.price);
+
     const targetDate = new Date(booking_date);
+    if (isNaN(targetDate.getTime())) {
+      return NextResponse.json({ message: "Invalid booking date format." }, { status: 400 });
+    }
+
     const startOfDay = new Date(targetDate);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(targetDate);
@@ -44,26 +74,26 @@ export async function POST(req: NextRequest) {
     const booking = await prisma.booking.create({
       data: {
         booking_number: generateBookingNumber(),
-        user_id: user.id as string,
-        service_id,
-        booking_date: new Date(booking_date),
+        user_id: dbUser.id,
+        service_id: dbService.id,
+        booking_date: targetDate,
         booking_time,
-        notes,
-        payment_preference,
-        total_amount,
+        notes: notes || null,
+        payment_preference: payment_preference || "PAY_AFTER_SERVICE",
+        total_amount: finalAmount,
         status: "REQUESTED",
         payments: {
           create: {
-            amount: total_amount,
+            amount: finalAmount,
             payment_method: payment_preference === 'PAY_NOW' ? 'ONLINE' : 'CASH',
             payment_status: payment_preference === 'PAY_NOW' ? 'PAID' : 'PAY_AFTER_SERVICE'
           }
         },
         notifications: {
           create: {
-            user_id: user.id as string,
+            user_id: dbUser.id,
             title: "Booking Request Submitted",
-            message: `Your request for booking on ${booking_date} at ${booking_time} has been submitted.`
+            message: `Your appointment request for ${dbService.name} on ${booking_date} at ${booking_time} has been submitted.`
           }
         }
       },
@@ -72,9 +102,9 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    return NextResponse.json({ message: "Booking created", booking }, { status: 201 });
-  } catch (error) {
+    return NextResponse.json({ message: "Booking created successfully", booking }, { status: 201 });
+  } catch (error: any) {
     console.error("Booking error:", error);
-    return NextResponse.json({ message: "Failed to create booking" }, { status: 500 });
+    return NextResponse.json({ message: error?.message || "Failed to create booking. Please try again." }, { status: 500 });
   }
 }
