@@ -6,6 +6,7 @@ import { signToken } from "@/lib/auth";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const { email, password, role } = body || {};
     const normalizedEmail = (email || "").trim().toLowerCase();
 
     if (!normalizedEmail || !password) {
