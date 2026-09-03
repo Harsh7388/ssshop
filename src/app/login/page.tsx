@@ -37,10 +37,11 @@ export default function Login() {
 
       await refreshAuth();
 
-      // Redirect based on role
-      if (data.user.role === "CUSTOMER") router.push("/customer/dashboard");
-      else if (data.user.role === "MANAGER") router.push("/manager/dashboard");
-      else if (data.user.role === "ADMIN") router.push("/admin/dashboard");
+      // Redirect based on role with full session sync
+      if (data.user.role === "CUSTOMER") window.location.href = "/customer/dashboard";
+      else if (data.user.role === "MANAGER") window.location.href = "/manager/dashboard";
+      else if (data.user.role === "ADMIN") window.location.href = "/admin/dashboard";
+      else window.location.href = "/";
       
     } catch (err: any) {
       setError(err.message);
