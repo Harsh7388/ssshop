@@ -38,7 +38,7 @@ export default function Register() {
       }
 
       await refreshAuth();
-      router.push("/customer/dashboard");
+      window.location.href = "/customer/dashboard";
       
     } catch (err: any) {
       setError(err.message);

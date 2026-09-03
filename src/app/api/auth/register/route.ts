@@ -6,9 +6,10 @@ import { signToken } from "@/lib/auth";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, password, gender } = body;
+    const { name, email, phone, password, gender } = body || {};
+    const normalizedEmail = (email || "").trim().toLowerCase();
 
-    if (!name || !email || !password) {
+    if (!name || !normalizedEmail || !password) {
       return NextResponse.json(
         { message: "Name, email, and password are required" },
         { status: 400 }
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existingUser) {
       return NextResponse.json(
         { message: "Email is already registered" },
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
     const newUser = await prisma.user.create({
       data: {
         name,
-        email,
+        email: normalizedEmail,
         phone: phone || null,
         password_hash,
         gender: gender || null,
@@ -65,10 +66,10 @@ export async function POST(req: NextRequest) {
 
     return response;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { message: "Internal server error" },
+      { message: error?.message || "Internal server error" },
       { status: 500 }
     );
   }
