@@ -12,45 +12,56 @@ export async function POST(req: NextRequest) {
 
     if (!inputIdentifier || !inputPassword) {
       return NextResponse.json(
-        { message: "User ID (email or mobile) and password are required" },
+        { message: "User ID (email, phone, or name) and password are required" },
         { status: 400 }
       );
     }
 
     const isEmail = inputIdentifier.includes("@");
-    const emailLower = inputIdentifier.toLowerCase();
+    const lower = inputIdentifier.toLowerCase();
     const digitsOnly = inputIdentifier.replace(/\D/g, "");
-    const phone10 = digitsOnly.length >= 10 ? digitsOnly.slice(-10) : digitsOnly;
+    const phone10 = digitsOnly.length >= 10 ? digitsOnly.slice(-10) : (digitsOnly.length >= 5 ? digitsOnly : "");
 
-    // Build database search conditions
-    const searchConditions: any[] = [];
-    if (isEmail) {
-      searchConditions.push({ email: emailLower });
-    } else {
-      searchConditions.push({ phone: inputIdentifier });
-      if (phone10) {
-        searchConditions.push({ phone: phone10 });
-        searchConditions.push({ phone: `+91${phone10}` });
-        searchConditions.push({ phone: `91${phone10}` });
-        searchConditions.push({ phone: `0${phone10}` });
+    // Fetch accounts from both tables for robust identification
+    const [allUsers, allManagers] = await Promise.all([
+      prisma.user.findMany(),
+      prisma.serviceManager.findMany()
+    ]);
+
+    const candidates: any[] = [];
+
+    const checkMatch = (account: any) => {
+      const accEmail = (account.email || "").toLowerCase();
+      const accPhone = (account.phone || "").replace(/\D/g, "");
+      const accName = (account.name || "").toLowerCase();
+      const accNameParts = accName.split(/\s+/);
+
+      // 1. Email match (exact or username prefix before @)
+      if (isEmail && accEmail === lower) return true;
+      if (!isEmail && (accEmail === lower || accEmail.split("@")[0] === lower)) return true;
+
+      // 2. Phone match
+      if (phone10 && accPhone.includes(phone10)) return true;
+      if (digitsOnly && accPhone === digitsOnly) return true;
+      if (account.phone && account.phone.trim() === inputIdentifier) return true;
+
+      // 3. Name match (full name or first/last name part)
+      if (!isEmail && !digitsOnly && (accName === lower || accNameParts.includes(lower))) return true;
+
+      return false;
+    };
+
+    for (const u of allUsers) {
+      if (checkMatch(u)) {
+        candidates.push({ ...u, resolvedRole: "CUSTOMER", tableType: "User" });
       }
     }
 
-    // Query Customer table
-    const customerMatches = await prisma.user.findMany({
-      where: { OR: searchConditions }
-    });
-
-    // Query ServiceManager table
-    const managerMatches = await prisma.serviceManager.findMany({
-      where: { OR: searchConditions }
-    });
-
-    // Merge candidate accounts
-    const candidates = [
-      ...customerMatches.map(u => ({ ...u, resolvedRole: "CUSTOMER", tableType: "User" })),
-      ...managerMatches.map(m => ({ ...m, resolvedRole: m.role || "MANAGER", tableType: "ServiceManager" }))
-    ];
+    for (const m of allManagers) {
+      if (checkMatch(m)) {
+        candidates.push({ ...m, resolvedRole: m.role || "MANAGER", tableType: "ServiceManager" });
+      }
+    }
 
     if (candidates.length === 0) {
       return NextResponse.json(
