@@ -113,6 +113,10 @@ export default function Header() {
                 onMouseEnter={e => (e.currentTarget.style.color = "#c19d60")}
                 onMouseLeave={e => (e.currentTarget.style.color = "#374151")}
               >Appointments</Link>
+              <Link href="/manager/dashboard?tab=analytics" style={navLinkStyle}
+                onMouseEnter={e => (e.currentTarget.style.color = "#c19d60")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#374151")}
+              >Analytics & Records</Link>
             </>
           )}
 
@@ -310,6 +314,7 @@ export default function Header() {
               ["Requests", "/manager/dashboard?tab=requests"],
               ["Schedule / Calendar", "/manager/dashboard?tab=calendar"],
               ["Appointments", "/manager/dashboard?tab=appointments"],
+              ["Analytics & Records", "/manager/dashboard?tab=analytics"],
             ] : []),
             ...(user?.role === "ADMIN" ? [
               ["Admin Dashboard", "/admin/dashboard"],
