@@ -4,10 +4,18 @@ import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 function BookingSuccessContent() {
   const searchParams = useSearchParams();
   const bookingId = searchParams?.get("id");
+  const { user } = useAuth();
+
+  const dashboardUrl = user?.role === "ADMIN" 
+    ? "/admin/dashboard" 
+    : user?.role === "MANAGER" 
+      ? "/manager/dashboard" 
+      : "/customer/dashboard";
 
   return (
     <div className="container py-32 flex justify-center items-center">
@@ -19,7 +27,7 @@ function BookingSuccessContent() {
           Your booking request has been sent to the SS Hair Studio service manager. You will receive a confirmation once your appointment is scheduled.
         </p>
         <div className="flex flex-col gap-4">
-          <Link href="/customer/dashboard" className="btn-primary w-full">
+          <Link href={dashboardUrl} className="btn-primary w-full">
             Go to My Dashboard
           </Link>
           <Link href="/" className="btn-secondary w-full">

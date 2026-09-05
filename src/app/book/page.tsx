@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, ChevronRight, CalendarDays, Clock, CreditCard } from "lucide-react";
+import { CheckCircle2, ChevronRight, CalendarDays, Clock, CreditCard, UserCheck, AlertCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 function BookAppointmentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedService = searchParams?.get("service");
+  const { user: authUser, loading: authLoading } = useAuth();
 
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<any[]>([]);
@@ -28,6 +30,23 @@ function BookAppointmentContent() {
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
   const timeSlots = ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:30 PM", "04:00 PM", "05:30 PM", "07:00 PM"];
+
+  // Restore draft if user was redirected to login
+  useEffect(() => {
+    try {
+      const draftStr = sessionStorage.getItem("ss_booking_draft");
+      if (draftStr) {
+        const draft = JSON.parse(draftStr);
+        if (draft.booking_date) setSelectedDate(draft.booking_date);
+        if (draft.booking_time) setSelectedTime(draft.booking_time);
+        if (draft.notes) setNotes(draft.notes);
+        if (draft.payment_preference) setPaymentPreference(draft.payment_preference);
+        if (draft.step) setStep(draft.step);
+      }
+    } catch (e) {
+      // ignore parse error
+    }
+  }, []);
 
   useEffect(() => {
     if (selectedDate) {
@@ -53,9 +72,20 @@ function BookAppointmentContent() {
     fetch("/api/services")
       .then(res => res.json())
       .then(data => {
-        setServices(data.services || []);
-        if (preselectedService && data.services) {
-          const s = data.services.find((x: any) => x.id === preselectedService);
+        const servList = data.services || [];
+        setServices(servList);
+        
+        let draftServiceId = preselectedService;
+        try {
+          const draftStr = sessionStorage.getItem("ss_booking_draft");
+          if (draftStr) {
+            const draft = JSON.parse(draftStr);
+            if (draft.service_id) draftServiceId = draft.service_id;
+          }
+        } catch (e) {}
+
+        if (draftServiceId && servList.length > 0) {
+          const s = servList.find((x: any) => x.id === draftServiceId);
           if (s) setSelectedService(s);
         }
         setLoading(false);
@@ -69,6 +99,19 @@ function BookAppointmentContent() {
   const handleNext = () => setStep(s => s + 1);
   const handleBack = () => setStep(s => s - 1);
 
+  const saveDraft = () => {
+    try {
+      sessionStorage.setItem("ss_booking_draft", JSON.stringify({
+        service_id: selectedService?.id,
+        booking_date: selectedDate,
+        booking_time: selectedTime,
+        notes,
+        payment_preference: paymentPreference,
+        step: 4
+      }));
+    } catch (e) {}
+  };
+
   const handleSubmit = async () => {
     setBookingLoading(true);
     setError("");
@@ -77,6 +120,7 @@ function BookAppointmentContent() {
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           service_id: selectedService.id,
           booking_date: selectedDate,
@@ -90,7 +134,8 @@ function BookAppointmentContent() {
       const data = await res.json();
       if (!res.ok) {
         if (res.status === 401) {
-          setError("Please log in to your account to complete your booking.");
+          saveDraft();
+          setError("Please log in to your account to complete your booking. Redirecting to login...");
           setTimeout(() => {
             router.push(`/login?redirect=/book?service=${selectedService?.id || ''}`);
           }, 1500);
@@ -99,6 +144,8 @@ function BookAppointmentContent() {
         throw new Error(data.message || "Failed to book appointment");
       }
 
+      // Clear draft on success
+      try { sessionStorage.removeItem("ss_booking_draft"); } catch (e) {}
       router.push(`/book/success?id=${data.booking.booking_number}`);
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred. Please try again.");
@@ -333,6 +380,36 @@ function BookAppointmentContent() {
                 <p className="text-sm text-muted">Pay at the salon after your service is completed.</p>
               </div>
             </div>
+
+            {authUser ? (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3.5 mb-6 flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2 text-emerald-800">
+                  <UserCheck size={18} className="text-emerald-600 shrink-0" />
+                  <span>Booking as: <strong>{authUser.name}</strong> ({authUser.email || authUser.phone})</span>
+                </div>
+                <span className="text-xs bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded font-semibold uppercase tracking-wider">{authUser.role}</span>
+              </div>
+            ) : !authLoading ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm text-amber-800 flex items-start justify-between gap-4">
+                <div className="flex items-start gap-2.5">
+                  <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold mb-0.5">Please Note: Account Required</p>
+                    <p className="text-xs text-amber-700">You must be signed in to confirm your booking. Your selections will be saved.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveDraft();
+                    router.push(`/login?redirect=/book?service=${selectedService?.id || ''}`);
+                  }}
+                  className="text-xs font-bold text-primary hover:underline whitespace-nowrap px-3 py-1.5 border border-primary rounded bg-white"
+                >
+                  Sign In Now &rarr;
+                </button>
+              </div>
+            ) : null}
 
             <div className="flex justify-between items-center py-4 border-t border-border mb-8">
               <span className="text-lg font-medium">Total Amount to Pay</span>

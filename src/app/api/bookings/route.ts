@@ -8,22 +8,53 @@ function generateBookingNumber() {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = req.cookies.get('token')?.value;
+    const token = req.cookies.get('token')?.value || req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
     if (!token) {
       return NextResponse.json({ message: "Unauthorized. Please log in to book an appointment." }, { status: 401 });
     }
     
     const userPayload = await verifyToken(token);
-    if (!userPayload || userPayload.role !== 'CUSTOMER') {
-      return NextResponse.json({ message: "Unauthorized. Please log in as a customer." }, { status: 401 });
+    if (!userPayload || !userPayload.id) {
+      return NextResponse.json({ message: "Unauthorized. Please log in to book an appointment." }, { status: 401 });
     }
 
     // Verify user exists in DB
-    const dbUser = await prisma.user.findUnique({
+    let dbUser = await prisma.user.findUnique({
       where: { id: userPayload.id as string }
     });
+
+    // If not found in User (e.g. user logged in as Manager/Admin), find or auto-link a corresponding Customer profile
+    if (!dbUser && userPayload.email) {
+      const emailLower = (userPayload.email as string).trim().toLowerCase();
+      dbUser = await prisma.user.findUnique({
+        where: { email: emailLower }
+      });
+
+      if (!dbUser) {
+        // Look up details from ServiceManager
+        const mgr = await prisma.serviceManager.findUnique({
+          where: { id: userPayload.id as string }
+        });
+        if (mgr) {
+          dbUser = await prisma.user.create({
+            data: {
+              name: mgr.name,
+              email: mgr.email.toLowerCase(),
+              phone: mgr.phone,
+              password_hash: mgr.password_hash,
+              status: mgr.status,
+            }
+          });
+        }
+      }
+    }
+
     if (!dbUser) {
       return NextResponse.json({ message: "User account not found. Please log in again." }, { status: 401 });
+    }
+
+    if (dbUser.status !== 'ACTIVE') {
+      return NextResponse.json({ message: "Account is disabled. Please contact support." }, { status: 403 });
     }
 
     const body = await req.json();

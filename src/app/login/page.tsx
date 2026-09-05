@@ -1,20 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import { useAuth } from "@/context/AuthContext";
 
 import Logo from "@/components/Logo";
 
-export default function Login() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("CUSTOMER"); // CUSTOMER, MANAGER, ADMIN
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams?.get("redirect");
   const { refreshAuth } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -37,6 +39,12 @@ export default function Login() {
 
       await refreshAuth();
 
+      // If user came from a protected flow (like booking), redirect back there!
+      if (redirectUrl && redirectUrl.startsWith("/")) {
+        window.location.href = redirectUrl;
+        return;
+      }
+
       // Redirect based on role with full session sync
       if (data.user.role === "CUSTOMER") window.location.href = "/customer/dashboard";
       else if (data.user.role === "MANAGER") window.location.href = "/manager/dashboard";
@@ -58,6 +66,9 @@ export default function Login() {
             <Logo size="lg" />
           </div>
           <p className="text-muted">Sign in to your SS Hair Studio account</p>
+          {redirectUrl && (
+            <p className="text-xs text-primary font-medium mt-1">Please sign in to continue with your booking</p>
+          )}
         </div>
 
         {error && (
@@ -88,15 +99,15 @@ export default function Login() {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="email">Email Address</label>
+            <label className="form-label" htmlFor="email">Email or Mobile Number</label>
             <input
-              type="email"
+              type="text"
               id="email"
               className="form-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="you@example.com"
+              placeholder="you@example.com or 9876543210"
             />
           </div>
 
@@ -131,11 +142,22 @@ export default function Login() {
 
         <div className="mt-8 text-center text-sm text-muted">
           Don't have an account?{" "}
-          <Link href="/register" className="text-primary font-medium hover:underline">
+          <Link 
+            href={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : "/register"} 
+            className="text-primary font-medium hover:underline"
+          >
             Register now
           </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div className="container py-32 text-center text-muted">Loading sign in...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

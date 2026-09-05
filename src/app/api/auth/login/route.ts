@@ -7,11 +7,12 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { email, password, role } = body || {};
-    const normalizedEmail = (email || "").trim().toLowerCase();
+    const inputIdentifier = (email || "").trim();
+    const normalizedEmail = inputIdentifier.toLowerCase();
 
-    if (!normalizedEmail || !password) {
+    if (!inputIdentifier || !password) {
       return NextResponse.json(
-        { message: "Email and password are required" },
+        { message: "User ID (email or mobile) and password are required" },
         { status: 400 }
       );
     }
@@ -19,21 +20,45 @@ export async function POST(req: NextRequest) {
     let user: any = null;
     let userRole = role || 'CUSTOMER';
 
+    // Helper to find in Customer table by email or phone
+    const findCustomer = async (identifier: string) => {
+      return await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: identifier.toLowerCase() },
+            { phone: identifier }
+          ]
+        }
+      });
+    };
+
+    // Helper to find in ServiceManager table by email or phone
+    const findManager = async (identifier: string) => {
+      return await prisma.serviceManager.findFirst({
+        where: {
+          OR: [
+            { email: identifier.toLowerCase() },
+            { phone: identifier }
+          ]
+        }
+      });
+    };
+
     if (userRole === 'CUSTOMER') {
-      user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+      user = await findCustomer(inputIdentifier);
       // Fallback: in case customer tab was selected but it's a manager/admin account
       if (!user) {
-        const mgr = await prisma.serviceManager.findUnique({ where: { email: normalizedEmail } });
+        const mgr = await findManager(inputIdentifier);
         if (mgr) {
           user = mgr;
           userRole = mgr.role;
         }
       }
     } else {
-      user = await prisma.serviceManager.findUnique({ where: { email: normalizedEmail } });
+      user = await findManager(inputIdentifier);
       // Fallback: in case manager/admin tab was selected but it's a customer account
       if (!user) {
-        const cust = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+        const cust = await findCustomer(inputIdentifier);
         if (cust) {
           user = cust;
           userRole = 'CUSTOMER';
@@ -45,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { message: "Invalid email or password" },
+        { message: "Invalid email/phone or password" },
         { status: 401 }
       );
     }
@@ -77,14 +102,15 @@ export async function POST(req: NextRequest) {
     const token = await signToken(payload);
 
     const response = NextResponse.json(
-      { message: "Login successful", user: payload },
+      { message: "Login successful", user: payload, token },
       { status: 200 }
     );
 
-    // Set cookie
+    // Set cookie: only secure if on HTTPS
+    const isHttps = req.nextUrl.protocol === "https:" || req.headers.get("x-forwarded-proto") === "https";
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isHttps,
       sameSite: "lax",
       maxAge: 60 * 60 * 24, // 24 hours
       path: "/",

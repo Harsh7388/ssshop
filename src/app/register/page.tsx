@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import { useAuth } from "@/context/AuthContext";
 
 import Logo from "@/components/Logo";
 
-export default function Register() {
+function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -17,6 +17,8 @@ export default function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams?.get("redirect");
   const { refreshAuth } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -38,6 +40,10 @@ export default function Register() {
       }
 
       await refreshAuth();
+      if (redirectUrl && redirectUrl.startsWith("/")) {
+        window.location.href = redirectUrl;
+        return;
+      }
       window.location.href = "/customer/dashboard";
       
     } catch (err: any) {
@@ -144,11 +150,22 @@ export default function Register() {
 
         <div className="mt-8 text-center text-sm text-muted">
           Already have an account?{" "}
-          <Link href="/login" className="text-primary font-medium hover:underline">
+          <Link 
+            href={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : "/login"} 
+            className="text-primary font-medium hover:underline"
+          >
             Sign in
           </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Register() {
+  return (
+    <Suspense fallback={<div className="container py-32 text-center text-muted">Loading registration...</div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }
