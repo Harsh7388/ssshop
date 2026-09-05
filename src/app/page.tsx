@@ -75,12 +75,12 @@ export default function Home() {
   }, []);
 
   const services = [
-    { name: "Premium Haircut", price: "₹500", duration: "45 min", category: "Men's", icon: "✂️" },
-    { name: "Beard Styling", price: "₹300", duration: "30 min", category: "Men's", icon: "🪒" },
-    { name: "Head Massage", price: "₹400", duration: "30 min", category: "Men's", icon: "💆" },
-    { name: "Advanced Facial", price: "₹1500", duration: "60 min", category: "Women's", icon: "✨" },
-    { name: "Hair Spa", price: "₹1200", duration: "75 min", category: "Women's", icon: "💆‍♀️" },
-    { name: "Bridal Makeup", price: "₹5000", duration: "150 min", category: "Women's", icon: "💍" },
+    { name: "Hair Cut (Advance)", price: "₹300", duration: "40 min", category: "Hair Care", icon: "✂️" },
+    { name: "Hair Spa", price: "₹700", duration: "60 min", category: "Hair Care", icon: "💆‍♀️" },
+    { name: "Head Massage", price: "₹400", duration: "30 min", category: "Hair Care", icon: "💆" },
+    { name: "Full Hand Wax (Rica)", price: "₹400", duration: "30 min", category: "Waxing", icon: "✨" },
+    { name: "Keratin Treatment", price: "From ₹2499", duration: "90 min", category: "Hair Care", icon: "💇‍♀️" },
+    { name: "Global Colour", price: "From ₹2000", duration: "90 min", category: "Hair Care", icon: "🎨" },
   ];
 
   return (
@@ -356,15 +356,15 @@ export default function Home() {
                 Limited Time Offer
               </span>
               <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)", fontWeight: 700, color: "#fff", lineHeight: 1.2, marginBottom: "16px" }}>
-                Weekend Grooming Package
+                Hair Spa & Advance Cut Combo
               </h2>
               <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.95rem", lineHeight: 1.7, marginBottom: "28px", maxWidth: "420px" }}>
-                Premium haircut, beard styling & head massage at an exclusive weekend price. Treat yourself to the full experience.
+                Deep conditioning Hair Spa plus precision Advance Hair Cut for complete hair transformation and volume.
               </p>
               <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
-                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.8rem", fontWeight: 700, color: "#c19d60" }}>₹999</span>
-                <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: "1.1rem", color: "rgba(255,255,255,0.35)", textDecoration: "line-through" }}>₹1200</span>
-                <span style={{ background: "#c19d60", color: "#fff", fontSize: "0.75rem", fontWeight: 700, padding: "4px 10px", borderRadius: "6px" }}>Save ₹201</span>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.8rem", fontWeight: 700, color: "#c19d60" }}>₹850</span>
+                <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: "1.1rem", color: "rgba(255,255,255,0.35)", textDecoration: "line-through" }}>₹1000</span>
+                <span style={{ background: "#c19d60", color: "#fff", fontSize: "0.75rem", fontWeight: 700, padding: "4px 10px", borderRadius: "6px" }}>Save ₹150</span>
               </div>
             </div>
             <div>

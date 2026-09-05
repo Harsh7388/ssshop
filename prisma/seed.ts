@@ -17,74 +17,100 @@ async function main() {
   await prisma.offer.createMany({
     data: [
       {
-        title: 'Weekend Grooming Package',
-        description: 'Premium haircut, beard styling & head massage at an exclusive price. Valid weekends only.',
-        discount: 17,
+        title: 'Hair Spa & Advance Cut Combo',
+        description: 'Rejuvenating deep conditioning Hair Spa + precision Advance Hair Cut at a special combo price.',
+        discount: 15,
         discountType: 'PERCENTAGE',
         start_date: new Date(),
-        end_date: new Date(new Date().setDate(new Date().getDate() + 7)),
+        end_date: new Date(new Date().setDate(new Date().getDate() + 30)),
         status: 'ACTIVE',
-        gender: 'MEN',
+        gender: 'ALL',
       },
       {
-        title: '20% OFF on All Hair Spa',
-        description: 'Get 20% discount on all hair spa and treatment services this month.',
+        title: '20% OFF on Hair Treatments',
+        description: 'Get 20% discount on Keratin, Kera Smooth, Botox & Cysteine treatments this month.',
         discount: 20,
         discountType: 'PERCENTAGE',
         start_date: new Date(),
         end_date: new Date(new Date().setDate(new Date().getDate() + 30)),
         status: 'ACTIVE',
-        gender: 'WOMEN',
+        gender: 'ALL',
       },
     ]
   });
 
-  // --- Services ---
+  // --- Services (From Official Hair Care & Waxing Menus) ---
   await prisma.service.deleteMany();
-  const menServices = await Promise.all([
-    prisma.service.create({ data: { name: 'Haircut', category: 'Hair', gender: 'MEN', description: 'Classic precision haircut styled to your preference.', price: 300, duration: 30, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Premium Haircut', category: 'Hair', gender: 'MEN', description: 'Luxury haircut with wash, blow-dry and styling.', price: 500, duration: 45, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Hair Styling', category: 'Hair', gender: 'MEN', description: 'Professional hair styling for events & special occasions.', price: 400, duration: 30, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Beard Trim', category: 'Grooming', gender: 'MEN', description: 'Precise beard trim and shaping.', price: 200, duration: 20, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Beard Styling', category: 'Grooming', gender: 'MEN', description: 'Full beard grooming with conditioning and sculpting.', price: 350, duration: 30, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Shaving', category: 'Grooming', gender: 'MEN', description: 'Classic straight razor shave with hot towel treatment.', price: 250, duration: 25, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Hair Coloring', category: 'Hair', gender: 'MEN', description: 'Professional hair coloring with premium color products.', price: 800, duration: 90, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Hair Spa', category: 'Spa', gender: 'MEN', description: 'Deep conditioning hair spa for strong, healthy hair.', price: 700, duration: 60, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Facial', category: 'Skin', gender: 'MEN', description: 'Rejuvenating facial treatment for cleaner, fresher skin.', price: 600, duration: 45, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Head Massage', category: 'Spa', gender: 'MEN', description: 'Relaxing head and scalp massage with essential oils.', price: 400, duration: 30, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Full Grooming Package', category: 'Package', gender: 'MEN', description: 'Premium haircut + beard styling + head massage + facial.', price: 1499, duration: 120, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Manicure', category: 'Nail', gender: 'MEN', description: 'Professional hand and nail care treatment.', price: 350, duration: 30, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Pedicure', category: 'Nail', gender: 'MEN', description: 'Relaxing foot care and nail treatment.', price: 450, duration: 45, status: 'ACTIVE' } }),
+
+  // 1. Hair Care - Basic & Styling
+  const hairCareServices = await Promise.all([
+    prisma.service.create({ data: { name: 'Hair Cut (Trimming)', category: 'Hair Care', gender: 'ALL', description: 'Split-end trimming, shaping, and length maintenance.', price: 150, duration: 25, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Hair Cut (Advance)', category: 'Hair Care', gender: 'ALL', description: 'Advanced precision haircut styled according to your facial structure.', price: 300, duration: 40, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Hair Wash', category: 'Hair Care', gender: 'ALL', description: 'Invigorating hair and scalp wash with professional salon shampoo.', price: 150, duration: 20, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Head Massage', category: 'Hair Care', gender: 'ALL', description: 'Deeply relaxing head and scalp massage with nourishing therapeutic oils.', price: 400, duration: 30, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Hair Spa', category: 'Hair Care', gender: 'ALL', description: 'Intensive deep conditioning hair spa for damaged, dull, or dry hair.', price: 700, duration: 60, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Hair Root Touchup', category: 'Hair Care', gender: 'ALL', description: 'Professional root touchup colour application for uniform hair tone.', price: 800, duration: 60, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Highlights (Per Strip)', category: 'Hair Care', gender: 'ALL', description: 'Single foil highlight streak or strip with custom toning.', price: 150, duration: 30, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Highlights (Full)', category: 'Hair Care', gender: 'ALL', description: 'Full head dimensional highlights for luminous texture and contrast.', price: 3000, duration: 120, status: 'ACTIVE' } }),
   ]);
 
-  const womenServices = await Promise.all([
-    // Real Waxing Prices from Menu (Honey & Rica options)
-    prisma.service.create({ data: { name: 'Full Hand Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Smooth full arm waxing using natural Honey wax.', price: 200, duration: 30, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Full Hand Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Premium painless full arm waxing using imported Rica wax.', price: 400, duration: 30, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Full Leg Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Complete leg waxing with Honey wax.', price: 450, duration: 45, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Full Leg Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Luxury full leg waxing with Rica liposoluble wax.', price: 650, duration: 45, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Half Hand Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Half arm waxing with gentle Honey wax.', price: 150, duration: 20, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Half Hand Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Half arm waxing using Rica wax for sensitive skin.', price: 300, duration: 20, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Half Leg Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Half leg waxing with natural Honey wax.', price: 250, duration: 30, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Half Leg Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Half leg waxing with premium Rica wax.', price: 400, duration: 30, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Under Arm\'s Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Underarm waxing using Honey wax.', price: 50, duration: 15, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Under Arm\'s Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Underarm waxing using Rica wax.', price: 100, duration: 15, status: 'ACTIVE' } }),
+  // 2. Hair Care - Treatments & Colouring (S / M / B variants)
+  const hairTreatmentServices = await Promise.all([
+    // Global Colour
+    prisma.service.create({ data: { name: 'Global Colour (Short Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Complete global hair colouring for short hair.', price: 2000, duration: 90, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Global Colour (Medium Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Complete global hair colouring for medium hair.', price: 3000, duration: 105, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Global Colour (Long Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Complete global hair colouring for long / thick hair.', price: 3500, duration: 120, status: 'ACTIVE' } }),
+
+    // Kera Smooth
+    prisma.service.create({ data: { name: 'Kera Smooth (Short Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Keratin smoothing treatment for sleek, glossy short hair.', price: 4000, duration: 120, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Kera Smooth (Medium Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Keratin smoothing treatment for frizz-free medium hair.', price: 5000, duration: 150, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Kera Smooth (Long Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Keratin smoothing treatment for ultra-smooth long hair.', price: 6500, duration: 180, status: 'ACTIVE' } }),
+
+    // Botox Treatment
+    prisma.service.create({ data: { name: 'Botox Treatment (Short Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Deep anti-aging & restoration hair botox for short hair.', price: 2500, duration: 90, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Botox Treatment (Medium Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Deep anti-aging & restoration hair botox for medium hair.', price: 3000, duration: 120, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Botox Treatment (Long Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Deep anti-aging & restoration hair botox for long hair.', price: 4000, duration: 150, status: 'ACTIVE' } }),
+
+    // Cysteine Treatment
+    prisma.service.create({ data: { name: 'Cysteine Treatment (Short Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Gentle protein curl control cysteine treatment for short hair.', price: 2500, duration: 90, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Cysteine Treatment (Medium Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Gentle protein curl control cysteine treatment for medium hair.', price: 3000, duration: 120, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Cysteine Treatment (Long Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Gentle protein curl control cysteine treatment for long hair.', price: 4000, duration: 150, status: 'ACTIVE' } }),
+
+    // Keratin
+    prisma.service.create({ data: { name: 'Keratin (Short Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Intensive keratin protein smoothening for short hair.', price: 2499, duration: 90, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Keratin (Medium Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Intensive keratin protein smoothening for medium hair.', price: 3000, duration: 120, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Keratin (Long Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Intensive keratin protein smoothening for long hair.', price: 3500, duration: 150, status: 'ACTIVE' } }),
+
+    // Hair Smoothing
+    prisma.service.create({ data: { name: 'Hair Smoothing (Short Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Silky hair smoothening for straight manageable short hair.', price: 3000, duration: 120, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Hair Smoothing (Medium Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Silky hair smoothening for straight manageable medium hair.', price: 3500, duration: 150, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Hair Smoothing (Long Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Silky hair smoothening for straight manageable long hair.', price: 4500, duration: 180, status: 'ACTIVE' } }),
+
+    // Nanoplastia (Nano Plaster)
+    prisma.service.create({ data: { name: 'Nanoplastia (Short Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Advanced organic nanoplastia realignment for short hair.', price: 3000, duration: 120, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Nanoplastia (Medium Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Advanced organic nanoplastia realignment for medium hair.', price: 3500, duration: 150, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Nanoplastia (Long Hair)', category: 'Hair Treatments', gender: 'ALL', description: 'Advanced organic nanoplastia realignment for long hair.', price: 4000, duration: 180, status: 'ACTIVE' } }),
+  ]);
+
+  // 3. Waxing (Honey & Rica Options)
+  const waxingServices = await Promise.all([
+    prisma.service.create({ data: { name: 'Full Hand Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Smooth full arms waxing using natural Honey wax.', price: 200, duration: 30, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Full Hand Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Gentle, pain-free full arms waxing using premium Rica liposoluble wax.', price: 400, duration: 30, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Full Leg Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Complete full legs waxing with Honey wax.', price: 450, duration: 45, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Full Leg Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Premium full legs waxing using Rica wax for smooth sensitive skin.', price: 650, duration: 45, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Half Hand Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Half arms waxing with soothing Honey wax.', price: 150, duration: 20, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Half Hand Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Half arms waxing with luxury Rica wax.', price: 300, duration: 20, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Half Leg Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Half legs waxing with Honey wax.', price: 250, duration: 30, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Half Leg Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Half legs waxing with Rica wax.', price: 400, duration: 30, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Under Arm\'s Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Underarm waxing using gentle Honey wax.', price: 50, duration: 15, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Under Arm\'s Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Underarm waxing using soothing Rica wax.', price: 100, duration: 15, status: 'ACTIVE' } }),
     prisma.service.create({ data: { name: 'Face Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Gentle facial waxing with Honey wax.', price: 100, duration: 20, status: 'ACTIVE' } }),
     prisma.service.create({ data: { name: 'Face Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Delicate facial hair removal with Rica wax.', price: 150, duration: 20, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Upper Lips Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Upper lip hair removal with Honey wax.', price: 20, duration: 10, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Upper Lips Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Upper lip hair removal with Rica wax.', price: 50, duration: 10, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Chin Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Chin hair waxing using Honey wax.', price: 20, duration: 10, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Chin Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Chin hair waxing using Rica wax.', price: 50, duration: 10, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Full Body Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Complete full body waxing with Honey wax.', price: 1000, duration: 90, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Full Body Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Complete full body waxing with premium Rica wax.', price: 1500, duration: 90, status: 'ACTIVE' } }),
-
-    // Other Women Services
-    prisma.service.create({ data: { name: "Women's Haircut", category: 'Hair', gender: 'WOMEN', description: 'Expert haircut and styling for any hair type.', price: 500, duration: 45, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Hair Styling', category: 'Hair', gender: 'WOMEN', description: 'Professional styling with blow-dry, curls or straightening.', price: 600, duration: 60, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Hair Spa', category: 'Spa', gender: 'WOMEN', description: 'Luxurious hair spa for silky, nourished hair.', price: 1200, duration: 75, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Advanced Facial', category: 'Skin', gender: 'WOMEN', description: 'Deep cleanse facial with serums and masks for radiant skin.', price: 1500, duration: 60, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Manicure', category: 'Nail', gender: 'WOMEN', description: 'Luxury manicure with nail art option.', price: 500, duration: 45, status: 'ACTIVE' } }),
-    prisma.service.create({ data: { name: 'Pedicure', category: 'Nail', gender: 'WOMEN', description: 'Spa pedicure with scrub, massage and nail polish.', price: 700, duration: 60, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Upper Lips Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Quick and clean upper lip hair removal with Honey wax.', price: 20, duration: 10, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Upper Lips Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Delicate upper lip hair removal with Rica wax.', price: 50, duration: 10, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Chin Wax (Honey)', category: 'Waxing', gender: 'WOMEN', description: 'Chin hair removal with Honey wax.', price: 20, duration: 10, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Chin Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Precise chin hair removal with Rica wax.', price: 50, duration: 10, status: 'ACTIVE' } }),
+    prisma.service.create({ data: { name: 'Full Body Wax (Rica)', category: 'Waxing', gender: 'WOMEN', description: 'Complete full body waxing treatment using premium imported Rica wax.', price: 1500, duration: 90, status: 'ACTIVE' } }),
   ]);
 
   // --- Managers ---
@@ -116,27 +142,26 @@ async function main() {
   // --- Bookings & Feedback ---
   await prisma.feedback.deleteMany();
   await prisma.booking.deleteMany();
-  
-  const harshBooking = await prisma.booking.create({
+    const harshBooking = await prisma.booking.create({
     data: {
       booking_number: 'SS-100001',
       user_id: harshUser.id,
-      service_id: menServices[1].id, // Premium Haircut
+      service_id: hairCareServices[1].id, // Hair Cut (Advance)
       manager_id: manager.id,
       assigned_staff: 'Rahul Sharma',
       booking_date: new Date(Date.now() + 86400000),
       booking_time: '04:00 PM',
       status: 'CONFIRMED',
       payment_preference: 'PAY_AFTER_SERVICE',
-      total_amount: menServices[1].price,
-      notes: 'Customer requested styling advice.',
+      total_amount: hairCareServices[1].price,
+      notes: 'Customer requested consultation for hair styling.',
     }
   });
 
   await prisma.payment.create({
     data: {
       booking_id: harshBooking.id,
-      amount: menServices[1].price,
+      amount: hairCareServices[1].price,
       payment_method: 'CASH',
       payment_status: 'PAY_AFTER_SERVICE',
     }
@@ -147,7 +172,7 @@ async function main() {
       user_id: harshUser.id,
       booking_id: harshBooking.id,
       title: 'Appointment Confirmed 🎉',
-      message: `Your SS Hair Studio appointment for Premium Haircut has been confirmed for 04:00 PM with Rahul Sharma.`,
+      message: `Your SS Hair Studio appointment for Hair Cut (Advance) has been confirmed for 04:00 PM with Rahul Sharma.`,
       read_status: false,
     }
   });

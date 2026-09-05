@@ -15,6 +15,8 @@ function BookAppointmentContent() {
 
   // Form State
   const [selectedService, setSelectedService] = useState<any>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -134,23 +136,71 @@ function BookAppointmentContent() {
         {/* Step 1: Select Service */}
         {step === 1 && (
           <div className="animate-fade-in">
-            <h2 className="text-2xl mb-6 font-serif">Select a Service</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {services.map((service) => (
-                <div 
-                  key={service.id}
-                  onClick={() => setSelectedService(service)}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    selectedService?.id === service.id ? 'border-primary bg-primary-light' : 'border-border hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold">{service.name}</h3>
-                    <span className="text-primary font-bold">₹{service.price}</span>
+            <h2 className="text-2xl mb-2 font-serif">Select a Service</h2>
+            <p className="text-muted text-sm mb-6">Choose from our official Hair Care & Waxing salon rate cards.</p>
+
+            {/* Category Filter Tabs & Search */}
+            <div className="flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center mb-6">
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {[
+                  { id: "ALL", label: "All Services" },
+                  { id: "Hair Care", label: "Hair Care" },
+                  { id: "Hair Treatments", label: "Hair Treatments (S/M/B)" },
+                  { id: "Waxing", label: "Waxing (Honey & Rica)" },
+                ].map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                      selectedCategory === cat.id
+                        ? "bg-primary text-white shadow-sm"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                type="text"
+                placeholder="Search service (e.g. Spa, Keratin, Wax)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="form-input text-xs py-2 px-3 md:w-64"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[480px] overflow-y-auto pr-1">
+              {services
+                .filter((s) => {
+                  const matchesCat = selectedCategory === "ALL" || s.category === selectedCategory;
+                  const matchesQuery = !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.description?.toLowerCase().includes(searchQuery.toLowerCase());
+                  return matchesCat && matchesQuery;
+                })
+                .map((service) => (
+                  <div 
+                    key={service.id}
+                    onClick={() => setSelectedService(service)}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                      selectedService?.id === service.id ? 'border-primary bg-primary-light shadow-sm' : 'border-border hover:border-gray-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-bold text-sm text-gray-900">{service.name}</h3>
+                      <span className="text-primary font-bold text-base">₹{service.price}</span>
+                    </div>
+                    <div className="text-xs text-muted mb-1 flex items-center gap-2">
+                      <span>{service.duration} mins</span>
+                      <span>&bull;</span>
+                      <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-medium uppercase">{service.category}</span>
+                    </div>
+                    {service.description && (
+                      <p className="text-xs text-gray-500 line-clamp-1">{service.description}</p>
+                    )}
                   </div>
-                  <div className="text-sm text-muted">{service.duration} mins &bull; {service.gender}</div>
-                </div>
-              ))}
+                ))}
             </div>
             <div className="mt-8 flex justify-end">
               <button onClick={handleNext} disabled={!selectedService} className="btn-primary disabled:opacity-50">
@@ -267,7 +317,7 @@ function BookAppointmentContent() {
                   <CreditCard className="text-primary" />
                   <h3 className="font-bold">Pay Now (Razorpay)</h3>
                 </div>
-                <p className="text-sm text-muted">Secure online payment. *Simulation for demo</p>
+                <p className="text-sm text-muted">Secure online card, UPI & netbanking payment.</p>
               </div>
               
               <div 

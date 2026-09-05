@@ -16,7 +16,7 @@ export default function Footer() {
             <Logo size="md" light={true} />
           </Link>
           <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.75, marginBottom: "20px" }}>
-            Premium unisex salon experience in Bhayandar East. Haircuts, spa, facials, waxing, and styling tailored for your style and confidence.
+            Premium salon experience in Bhayandar East. Hair Care, treatments, spa, haircuts, and specialized Honey & Rica waxing tailored for your confidence.
           </p>
           <div style={{ display: "flex", gap: "4px" }}>
             {["★","★","★","★","★"].map((s, i) => <span key={i} style={{ color: "#c19d60", fontSize: "1rem" }}>{s}</span>)}
@@ -42,7 +42,13 @@ export default function Footer() {
         <div>
           <h4 style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#c19d60", marginBottom: "20px" }}>Services</h4>
           <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "12px" }}>
-            {[["Men's Grooming", "/services/men"], ["Women's Beauty", "/services/women"], ["Waxing (Honey & Rica)", "/services/women"], ["Hair Spa", "/services"], ["Beard Styling", "/services/men"]].map(([l, h]) => (
+            {[
+              ["Hair Care Menu", "/services#hair-care"],
+              ["Hair Treatments (S/M/B)", "/services#hair-treatments"],
+              ["Waxing (Honey & Rica)", "/services#waxing"],
+              ["Hair Spa & Massages", "/services#hair-care"],
+              ["Advance Haircut", "/services#hair-care"]
+            ].map(([l, h]) => (
               <li key={l}>
                 <Link href={h} style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", textDecoration: "none", transition: "color 0.2s" }}
                   onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "#c19d60")}
