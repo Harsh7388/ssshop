@@ -8,95 +8,92 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { email, password, role } = body || {};
     const inputIdentifier = (email || "").trim();
-    const normalizedEmail = inputIdentifier.toLowerCase();
+    const inputPassword = (password || "");
 
-    if (!inputIdentifier || !password) {
+    if (!inputIdentifier || !inputPassword) {
       return NextResponse.json(
         { message: "User ID (email or mobile) and password are required" },
         { status: 400 }
       );
     }
 
-    let user: any = null;
-    let userRole = role || 'CUSTOMER';
+    const isEmail = inputIdentifier.includes("@");
+    const emailLower = inputIdentifier.toLowerCase();
+    const digitsOnly = inputIdentifier.replace(/\D/g, "");
+    const phone10 = digitsOnly.length >= 10 ? digitsOnly.slice(-10) : digitsOnly;
 
-    // Helper to find in Customer table by email or phone
-    const findCustomer = async (identifier: string) => {
-      return await prisma.user.findFirst({
-        where: {
-          OR: [
-            { email: identifier.toLowerCase() },
-            { phone: identifier }
-          ]
-        }
-      });
-    };
-
-    // Helper to find in ServiceManager table by email or phone
-    const findManager = async (identifier: string) => {
-      return await prisma.serviceManager.findFirst({
-        where: {
-          OR: [
-            { email: identifier.toLowerCase() },
-            { phone: identifier }
-          ]
-        }
-      });
-    };
-
-    if (userRole === 'CUSTOMER') {
-      user = await findCustomer(inputIdentifier);
-      // Fallback: in case customer tab was selected but it's a manager/admin account
-      if (!user) {
-        const mgr = await findManager(inputIdentifier);
-        if (mgr) {
-          user = mgr;
-          userRole = mgr.role;
-        }
-      }
+    // Build database search conditions
+    const searchConditions: any[] = [];
+    if (isEmail) {
+      searchConditions.push({ email: emailLower });
     } else {
-      user = await findManager(inputIdentifier);
-      // Fallback: in case manager/admin tab was selected but it's a customer account
-      if (!user) {
-        const cust = await findCustomer(inputIdentifier);
-        if (cust) {
-          user = cust;
-          userRole = 'CUSTOMER';
-        }
-      } else {
-        userRole = user.role; // MANAGER or ADMIN
+      searchConditions.push({ phone: inputIdentifier });
+      if (phone10) {
+        searchConditions.push({ phone: phone10 });
+        searchConditions.push({ phone: `+91${phone10}` });
+        searchConditions.push({ phone: `91${phone10}` });
+        searchConditions.push({ phone: `0${phone10}` });
       }
     }
 
-    if (!user) {
+    // Query Customer table
+    const customerMatches = await prisma.user.findMany({
+      where: { OR: searchConditions }
+    });
+
+    // Query ServiceManager table
+    const managerMatches = await prisma.serviceManager.findMany({
+      where: { OR: searchConditions }
+    });
+
+    // Merge candidate accounts
+    const candidates = [
+      ...customerMatches.map(u => ({ ...u, resolvedRole: "CUSTOMER", tableType: "User" })),
+      ...managerMatches.map(m => ({ ...m, resolvedRole: m.role || "MANAGER", tableType: "ServiceManager" }))
+    ];
+
+    if (candidates.length === 0) {
       return NextResponse.json(
         { message: "Invalid email/phone or password" },
         { status: 401 }
       );
     }
 
-    if (user.status !== 'ACTIVE') {
-      return NextResponse.json(
-        { message: "Account is disabled" },
-        { status: 403 }
-      );
+    // Prioritize candidates matching the selected role in the UI if provided
+    const preferredRole = role ? role.toUpperCase() : null;
+    if (preferredRole) {
+      candidates.sort((a, b) => {
+        if (a.resolvedRole === preferredRole && b.resolvedRole !== preferredRole) return -1;
+        if (b.resolvedRole === preferredRole && a.resolvedRole !== preferredRole) return 1;
+        return 0;
+      });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    // Find the candidate account where password hash matches
+    let authenticatedUser: any = null;
+    for (const candidate of candidates) {
+      if (candidate.status !== "ACTIVE") continue;
+      
+      const isPasswordValid = await bcrypt.compare(inputPassword, candidate.password_hash);
+      if (isPasswordValid) {
+        authenticatedUser = candidate;
+        break;
+      }
+    }
 
-    if (!isPasswordValid) {
+    if (!authenticatedUser) {
       return NextResponse.json(
-        { message: "Invalid credentials" },
+        { message: "Invalid credentials. Please check your password." },
         { status: 401 }
       );
     }
 
     // Generate JWT token
     const payload = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: userRole,
+      id: authenticatedUser.id,
+      email: authenticatedUser.email,
+      name: authenticatedUser.name,
+      role: authenticatedUser.resolvedRole,
     };
     
     const token = await signToken(payload);
