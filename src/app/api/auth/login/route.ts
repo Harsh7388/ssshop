@@ -8,9 +8,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { email, password, role } = body || {};
     const inputIdentifier = (email || "").trim();
-    const inputPassword = (password || "");
+    const inputPassword = (password || "").trim();
+    const rawPassword = password || "";
 
-    if (!inputIdentifier || !inputPassword) {
+    if (!inputIdentifier || !rawPassword) {
       return NextResponse.json(
         { message: "User ID (email, phone, or name) and password are required" },
         { status: 400 }
@@ -19,8 +20,8 @@ export async function POST(req: NextRequest) {
 
     const isEmail = inputIdentifier.includes("@");
     const lower = inputIdentifier.toLowerCase();
-    const digitsOnly = inputIdentifier.replace(/\D/g, "");
-    const phone10 = digitsOnly.length >= 10 ? digitsOnly.slice(-10) : (digitsOnly.length >= 5 ? digitsOnly : "");
+    const inputDigits = inputIdentifier.replace(/\D/g, "");
+    const phone10 = inputDigits.length >= 10 ? inputDigits.slice(-10) : (inputDigits.length >= 5 ? inputDigits : "");
 
     // Fetch accounts from both tables for robust identification
     const [allUsers, allManagers] = await Promise.all([
@@ -31,9 +32,10 @@ export async function POST(req: NextRequest) {
     const candidates: any[] = [];
 
     const checkMatch = (account: any) => {
-      const accEmail = (account.email || "").toLowerCase();
-      const accPhone = (account.phone || "").replace(/\D/g, "");
-      const accName = (account.name || "").toLowerCase();
+      const accEmail = (account.email || "").trim().toLowerCase();
+      const accPhone = (account.phone || "").trim();
+      const accPhoneDigits = accPhone.replace(/\D/g, "");
+      const accName = (account.name || "").trim().toLowerCase();
       const accNameParts = accName.split(/\s+/);
 
       // 1. Email match (exact or username prefix before @)
@@ -41,12 +43,15 @@ export async function POST(req: NextRequest) {
       if (!isEmail && (accEmail === lower || accEmail.split("@")[0] === lower)) return true;
 
       // 2. Phone match
-      if (phone10 && accPhone.includes(phone10)) return true;
-      if (digitsOnly && accPhone === digitsOnly) return true;
-      if (account.phone && account.phone.trim() === inputIdentifier) return true;
+      if (inputDigits && accPhoneDigits) {
+        if (accPhoneDigits === inputDigits) return true;
+        if (phone10 && accPhoneDigits.slice(-10) === phone10) return true;
+        if (accPhoneDigits.endsWith(inputDigits) || inputDigits.endsWith(accPhoneDigits)) return true;
+      }
+      if (accPhone && accPhone === inputIdentifier) return true;
 
       // 3. Name match (full name or first/last name part)
-      if (!isEmail && !digitsOnly && (accName === lower || accNameParts.includes(lower))) return true;
+      if (!isEmail && !inputDigits && (accName === lower || accNameParts.includes(lower))) return true;
 
       return false;
     };
@@ -71,7 +76,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Prioritize candidates matching the selected role in the UI if provided
-    const preferredRole = role ? role.toUpperCase() : null;
+    const preferredRole = role ? String(role).toUpperCase() : null;
     if (preferredRole) {
       candidates.sort((a, b) => {
         if (a.resolvedRole === preferredRole && b.resolvedRole !== preferredRole) return -1;
@@ -83,9 +88,14 @@ export async function POST(req: NextRequest) {
     // Find the candidate account where password hash matches
     let authenticatedUser: any = null;
     for (const candidate of candidates) {
-      if (candidate.status !== "ACTIVE") continue;
+      const statusUpper = (candidate.status || "ACTIVE").toUpperCase();
+      if (statusUpper !== "ACTIVE") continue;
       
-      const isPasswordValid = await bcrypt.compare(inputPassword, candidate.password_hash);
+      let isPasswordValid = await bcrypt.compare(inputPassword, candidate.password_hash);
+      if (!isPasswordValid && rawPassword !== inputPassword) {
+        isPasswordValid = await bcrypt.compare(rawPassword, candidate.password_hash);
+      }
+
       if (isPasswordValid) {
         authenticatedUser = candidate;
         break;

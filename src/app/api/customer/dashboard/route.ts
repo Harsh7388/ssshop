@@ -4,7 +4,7 @@ import { verifyToken } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get("token")?.value;
+    const token = req.cookies.get("token")?.value || req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const userPayload = await verifyToken(token);

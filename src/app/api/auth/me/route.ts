@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get("token")?.value;
+    const token = req.cookies.get("token")?.value || req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     if (!token) {
       return NextResponse.json({ user: null }, { status: 200 });
     }
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    if (!user || user.status !== 'ACTIVE') {
+    if (!user || (user.status && user.status.toUpperCase() !== 'ACTIVE')) {
       return NextResponse.json({ user: null }, { status: 200 });
     }
 
@@ -46,3 +46,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ user: null }, { status: 200 });
   }
 }
+

@@ -39,7 +39,7 @@ function RegisterForm() {
         throw new Error(data.message || "Failed to register");
       }
 
-      await refreshAuth();
+      await refreshAuth(data.token);
       if (redirectUrl && redirectUrl.startsWith("/")) {
         window.location.href = redirectUrl;
         return;
@@ -52,6 +52,7 @@ function RegisterForm() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="container py-20 animate-fade-in flex justify-center items-center min-h-[80vh]">

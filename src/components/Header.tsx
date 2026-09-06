@@ -186,6 +186,22 @@ export default function Header() {
 
           {!loading && user && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {user.role === "CUSTOMER" && (
+                <Link href="/book" style={{
+                  background: "#c19d60", color: "#fff",
+                  padding: "8px 16px", borderRadius: "8px",
+                  fontFamily: "Montserrat, sans-serif", fontWeight: 700,
+                  fontSize: "0.78rem", letterSpacing: "0.05em", textTransform: "uppercase",
+                  display: "flex", alignItems: "center", gap: "6px",
+                  textDecoration: "none", transition: "all 0.25s ease",
+                  boxShadow: "0 2px 8px rgba(193,157,96,0.2)"
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#a8854a"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#c19d60"; }}
+                >
+                  <CalendarDays size={14} /> Book Now
+                </Link>
+              )}
               {/* User avatar + role */}
               <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#f9f8f6", border: "1px solid #ede8df", padding: "6px 14px 6px 8px", borderRadius: "30px" }}>
                 <div style={{
@@ -215,6 +231,7 @@ export default function Header() {
               </button>
             </div>
           )}
+
 
           {/* Theme Toggle Button */}
           <button

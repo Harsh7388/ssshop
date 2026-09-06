@@ -117,9 +117,15 @@ function BookAppointmentContent() {
     setError("");
 
     try {
+      const storedToken = typeof window !== "undefined" ? localStorage.getItem("ss_token") : null;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (storedToken) {
+        headers["Authorization"] = `Bearer ${storedToken}`;
+      }
+
       const res = await fetch("/api/bookings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         credentials: "include",
         body: JSON.stringify({
           service_id: selectedService.id,
@@ -143,6 +149,7 @@ function BookAppointmentContent() {
         }
         throw new Error(data.message || "Failed to book appointment");
       }
+
 
       // Clear draft on success
       try { sessionStorage.removeItem("ss_booking_draft"); } catch (e) {}

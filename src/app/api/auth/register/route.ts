@@ -8,8 +8,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, email, phone, password, gender } = body || {};
     const normalizedEmail = (email || "").trim().toLowerCase();
+    const cleanName = (name || "").trim();
+    const cleanPhone = phone ? String(phone).trim() : null;
+    const cleanPassword = (password || "").trim();
 
-    if (!name || !normalizedEmail || !password) {
+    if (!cleanName || !normalizedEmail || !cleanPassword) {
       return NextResponse.json(
         { message: "Name, email, and password are required" },
         { status: 400 }
@@ -26,14 +29,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Hash password
-    const password_hash = await bcrypt.hash(password, 10);
+    const password_hash = await bcrypt.hash(cleanPassword, 10);
 
     // Create user
     const newUser = await prisma.user.create({
       data: {
-        name,
+        name: cleanName,
         email: normalizedEmail,
-        phone: phone || null,
+        phone: cleanPhone,
         password_hash,
         gender: gender || null,
         status: "ACTIVE",
@@ -51,7 +54,7 @@ export async function POST(req: NextRequest) {
     const token = await signToken(payload);
 
     const response = NextResponse.json(
-      { message: "Registration successful", user: payload },
+      { message: "Registration successful", user: payload, token },
       { status: 201 }
     );
 

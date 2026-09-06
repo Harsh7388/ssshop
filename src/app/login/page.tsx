@@ -37,7 +37,8 @@ function LoginForm() {
         throw new Error(data.message || "Failed to login");
       }
 
-      await refreshAuth();
+      const loggedUser = await refreshAuth(data.token);
+      const userRole = loggedUser?.role || data.user?.role || "CUSTOMER";
 
       // If user came from a protected flow (like booking), redirect back there!
       if (redirectUrl && redirectUrl.startsWith("/")) {
@@ -46,9 +47,9 @@ function LoginForm() {
       }
 
       // Redirect based on role with full session sync
-      if (data.user.role === "CUSTOMER") window.location.href = "/customer/dashboard";
-      else if (data.user.role === "MANAGER") window.location.href = "/manager/dashboard";
-      else if (data.user.role === "ADMIN") window.location.href = "/admin/dashboard";
+      if (userRole === "CUSTOMER") window.location.href = "/customer/dashboard";
+      else if (userRole === "MANAGER") window.location.href = "/manager/dashboard";
+      else if (userRole === "ADMIN") window.location.href = "/admin/dashboard";
       else window.location.href = "/";
       
     } catch (err: any) {
@@ -57,6 +58,7 @@ function LoginForm() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="container py-20 animate-fade-in flex justify-center min-h-[70vh] items-center">
