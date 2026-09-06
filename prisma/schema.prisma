@@ -1,17 +1,16 @@
-// This is your Prisma schema file
-// Prisma v7 standard setup
+// Prisma schema for MongoDB Atlas
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String         @id @default(uuid())
+  id            String         @id @default(uuid()) @map("_id")
   name          String
   email         String         @unique
   phone         String?
@@ -25,7 +24,7 @@ model User {
 }
 
 model ServiceManager {
-  id            String     @id @default(uuid())
+  id            String     @id @default(uuid()) @map("_id")
   name          String
   email         String     @unique
   phone         String?
@@ -37,7 +36,7 @@ model ServiceManager {
 }
 
 model Service {
-  id             String     @id @default(uuid())
+  id             String     @id @default(uuid()) @map("_id")
   name           String
   category       String
   gender         String
@@ -53,7 +52,7 @@ model Service {
 }
 
 model Booking {
-  id                 String          @id @default(uuid())
+  id                 String          @id @default(uuid()) @map("_id")
   booking_number     String          @unique
   user_id            String
   service_id         String
@@ -76,7 +75,7 @@ model Booking {
 }
 
 model Payment {
-  id             String    @id @default(uuid())
+  id             String    @id @default(uuid()) @map("_id")
   booking_id     String
   amount         Float
   payment_method String
@@ -87,7 +86,7 @@ model Payment {
 }
 
 model Notification {
-  id          String   @id @default(uuid())
+  id          String   @id @default(uuid()) @map("_id")
   user_id     String
   booking_id  String?
   title       String
@@ -99,7 +98,7 @@ model Notification {
 }
 
 model Offer {
-  id             String   @id @default(uuid())
+  id             String   @id @default(uuid()) @map("_id")
   title          String
   description    String
   discount       Float
@@ -116,7 +115,7 @@ model Offer {
 }
 
 model Schedule {
-  id           String         @id @default(uuid())
+  id           String         @id @default(uuid()) @map("_id")
   manager_id   String
   date         DateTime
   start_time   String
@@ -127,7 +126,7 @@ model Schedule {
 }
 
 model Feedback {
-  id         String   @id @default(uuid())
+  id         String   @id @default(uuid()) @map("_id")
   booking_id String   @unique
   user_id    String
   service_id String
@@ -141,12 +140,10 @@ model Feedback {
 }
 
 model Staff {
-  id         String   @id @default(uuid())
+  id         String   @id @default(uuid()) @map("_id")
   name       String
   role       String   @default("STYLIST")
   phone      String?
   status     String   @default("ACTIVE")
   created_at DateTime @default(now())
 }
-
-
